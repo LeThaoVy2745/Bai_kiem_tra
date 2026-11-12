@@ -1,0 +1,81 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+  <h2 class="m-0">Tổng quan</h2>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="{{ url_for('add_category') }}">+ Thêm danh mục</a>
+    <a class="btn btn-success" href="{{ url_for('add_book') }}">+ Thêm sách</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3"><div class="card"><div class="card-body">
+    <div class="text-muted small">Danh mục</div><h3 class="mb-0">{{ total_categories }}</h3></div></div></div>
+  <div class="col-md-3"><div class="card"><div class="card-body">
+    <div class="text-muted small">Đầu sách</div><h3 class="mb-0">{{ total_books }}</h3></div></div></div>
+  <div class="col-md-3"><div class="card"><div class="card-body">
+    <div class="text-muted small">Tổng số lượng tồn</div><h3 class="mb-0">{{ total_quantity }}</h3></div></div></div>
+  <div class="col-md-3"><div class="card"><div class="card-body">
+    <div class="text-muted small">Giá trị tồn kho</div><h3 class="mb-0">{{ total_value | vnd }}</h3></div></div></div>
+</div>
+
+<div class="card mb-4"><div class="card-body">
+  <h5 class="mb-3">Sách theo danh mục</h5>
+  <table class="table align-middle mb-0">
+    <thead><tr>
+      <th>Danh mục</th><th class="text-end">Số sách</th><th style="width:30%">Tỷ lệ</th><th></th>
+    </tr></thead>
+    <tbody>
+    {% for s in stats %}
+      {% set pct = (s.book_count / max_count * 100) | round | int %}
+      <tr>
+        <td><a href="{{ url_for('books', category_id=s.id) }}">{{ s.name }}</a></td>
+        <td class="text-end">{{ s.book_count }}</td>
+        <td>
+          <div class="progress" style="height:8px">
+            <progress class="visually-hidden" max="100" value="{{ pct }}"></progress>
+            <div class="progress-bar bg-success" data-pct="{{ pct }}"></div>
+          </div>
+        </td>
+        <td class="text-end">
+          <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('books', category_id=s.id) }}">Xem sách</a>
+          <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('edit_category', id=s.id) }}">Sửa</a>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="4" class="text-center text-muted">Chưa có danh mục</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div></div>
+
+<div class="card"><div class="card-body">
+  <h5 class="mb-3">Sách thêm gần đây</h5>
+  <table class="table align-middle mb-0">
+    <thead><tr>
+      <th>Tên sách</th><th>Tác giả</th><th>Danh mục</th>
+      <th class="text-end">Giá</th><th class="text-end">SL</th><th></th>
+    </tr></thead>
+    <tbody>
+    {% for b in recent %}
+      <tr>
+        <td>{{ b.title }}</td>
+        <td>{{ b.author }}</td>
+        <td><a href="{{ url_for('books', category_id=b.category_id) }}">{{ b.category_name }}</a></td>
+        <td class="text-end">{{ b.price | vnd }}</td>
+        <td class="text-end">{{ b.quantity }}</td>
+        <td class="text-end"><a class="btn btn-sm btn-outline-secondary" href="{{ url_for('edit_book', id=b.id) }}">Sửa</a></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="6" class="text-center text-muted">Chưa có sách</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div></div>
+
+<script>
+  document.querySelectorAll(".progress-bar[data-pct]").forEach(function (el) {
+    el.style.width = el.dataset.pct + "%";
+  });
+</script>
+{% endblock %}
